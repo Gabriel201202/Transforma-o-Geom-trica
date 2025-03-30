@@ -36,21 +36,26 @@ def initialise():
 
 
 tx = 0
-direcao = 0.1
+tdirecao = 0.1
+sxyz = 1
+sdirecao = -0.1
 
 def display():
-     global tx, direcao
+     global tx, tdirecao, sxyz, sdirecao
 
      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
      glRotatef(1, 10, 0, 1) # Transformação geométrica Rotação
      glTranslatef(tx, 0, 0) # Transformação geométrica Translação
+     glScalef(sxyz, sxyz, sxyz)
      
-     tx += direcao
+     tx += tdirecao
+     sxyz += sdirecao
 
-     if tx >= 0.2:
-          direcao *= -1
-     elif tx <= -0.3:
-          direcao *= -1
+     if tx >= 0.2 or tx <= -0.3:
+          tdirecao *= -1
+     
+     if sxyz >= 1.1 or sxyz <= 0.9:
+          sdirecao *= -1
      
      glPushMatrix()
      wireCube()
