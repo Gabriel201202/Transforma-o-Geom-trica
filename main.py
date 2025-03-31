@@ -15,60 +15,77 @@ drawing_color = (1, 1, 1, 1)
 screen = pygame.display.set_mode((screen_width, screen_height), DOUBLEBUF | OPENGL)
 pygame.display.set_caption('OpenGL in Python')
 
-
 def initialise():
-     # Configurações para o estilo do cubo
-     glClearColor(background_color[0], background_color[1], background_color[2], background_color[3])
-     glColor(drawing_color)
+    glClearColor(*background_color)
+    glColor(*drawing_color)
 
-     # Projeção
-     glMatrixMode(GL_PROJECTION)
-     glLoadIdentity()
-     gluPerspective(60, (screen_width / screen_height), 0.1, 100.0)
+    # Projeção
+    glMatrixMode(GL_PROJECTION)
+    glLoadIdentity()
+    gluPerspective(60, (screen_width / screen_height), 0.1, 100.0)
 
-     # modelview
-     glMatrixMode(GL_MODELVIEW)
-     glTranslate(0, 0, -5)
-     glLoadIdentity()
-     glViewport(0, 0, screen.get_width(), screen.get_height())
-     glEnable(GL_DEPTH_TEST)
-     glTranslate(0, 0, -2)
+    # Modelview
+    glMatrixMode(GL_MODELVIEW)
+    glLoadIdentity()
+    glTranslate(0, 0, -5)
+    glViewport(0, 0, screen.get_width(), screen.get_height())
+    glEnable(GL_DEPTH_TEST)
 
+def mirror(axis='x'):
+    """ Aplica um espelhamento no eixo escolhido ('x', 'y' ou 'z'). """
+    if axis == 'x':
+        glScalef(-1, 1, 1)
+    elif axis == 'y':
+        glScalef(1, -1, 1)
+    elif axis == 'z':
+        glScalef(1, 1, -1)
 
+# Transformações
 tx = 0
 tdirecao = 0.1
 sxyz = 1
 sdirecao = -0.1
 
 def display():
-     global tx, tdirecao, sxyz, sdirecao
+    global tx, tdirecao, sxyz, sdirecao
 
-     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-     glRotatef(1, 10, 0, 1) # Transformação geométrica Rotação
-     glTranslatef(tx, 0, 0) # Transformação geométrica Translação
-     glScalef(sxyz, sxyz, sxyz)
-     
-     tx += tdirecao
-     sxyz += sdirecao
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    glLoadIdentity()
+    glTranslate(0, 0, -5)
+    glRotatef(1, 10, 0, 1)
+    glTranslatef(tx, 0, 0)
+    glScalef(sxyz, sxyz, sxyz)
 
-     if tx >= 0.2 or tx <= -0.3:
-          tdirecao *= -1
-     
-     if sxyz >= 1.1 or sxyz <= 0.9:
-          sdirecao *= -1
-     
-     glPushMatrix()
-     wireCube()
-     glPopMatrix()
+    # Desenha o cubo original
+    glPushMatrix()
+    glTranslatef(-1.5, 0, 0)  # Move o cubo original para a esquerda
+    wireCube()
+    glPopMatrix()
 
+    # Desenha o cubo espelhado
+    glPushMatrix()
+    glTranslatef(1.5, 0, 0)  # Move o cubo espelhado para a direita
+    mirror('x')  # Aplica espelhamento no eixo X
+    wireCube()
+    glPopMatrix()
+
+    # Atualiza valores de translação e escala
+    tx += tdirecao
+    sxyz += sdirecao
+
+    if tx >= 0.2 or tx <= -0.3:
+        tdirecao *= -1
+
+    if sxyz >= 1.1 or sxyz <= 0.9:
+        sdirecao *= -1
 
 done = False
 initialise()
 while not done:
-     for event in pygame.event.get():
-          if event.type == pygame.QUIT:
-               done = True
-     display()
-     pygame.display.flip()
-     pygame.time.wait(100)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            done = True
+    display()
+    pygame.display.flip()
+    pygame.time.wait(100)
 pygame.quit()
